@@ -36,7 +36,7 @@
 //	s32 st_blksize;
 //	s32 st_blocks;
 //	u32 st_attr;
-//}; 
+//};
 
 #else // (!_MSC_VER)
 
@@ -44,9 +44,11 @@
 
 #endif //_MSC_VER
 
+#if !defined(__vita__)
 struct _reent {
 	intptr_t _errno;
 };
+#endif
 
 #ifdef __APPLE__
 typedef __darwin_mode_t mode_t;
@@ -75,9 +77,9 @@ struct devoptab_t {
 	int (*chdir_r)(struct _reent *r, const char *name);
 	int (*rename_r) (struct _reent *r, const char *oldName, const char *newName);
 	int (*mkdir_r) (struct _reent *r, const char *path, int mode);
-		
+
 	int dirStateSize;
-	
+
 	DIR_ITER* (*diropen_r)(struct _reent *r, DIR_ITER *dirState, const char *path);
 	int (*dirreset_r)(struct _reent *r, DIR_ITER *dirState);
 	int (*dirnext_r)(struct _reent *r, DIR_ITER *dirState, char *filename, struct stat *filestat);
@@ -98,7 +100,7 @@ struct devoptab_t {
 
 devoptab_t* GetDeviceOpTab(const char* name);
 
-#define _ATTR_WEAK_ 
+#define _ATTR_WEAK_
 
 #endif //LIBFAT_PC
 

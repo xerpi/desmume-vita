@@ -24,6 +24,14 @@
 #include <cstdarg>
 #include <bitset>
 
+#if defined(__vita__)
+extern "C" {
+extern void console_printf(const char *s, ...);
+}
+#include <cstdio>
+#define printf(...) console_printf(__VA_ARGS__)
+#endif
+
 #include "types.h"
 #include "mem.h"
 

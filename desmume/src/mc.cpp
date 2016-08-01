@@ -174,7 +174,7 @@ bool BackupDevice::load_state(EMUFILE* is)
 	}
 	if(version>=1)
 		read32le(&addr,is);
-	
+
 	if(version>=2)
 	{
 		read8le(&motionInitState,is);
@@ -257,7 +257,7 @@ BackupDevice::BackupDevice()
 				{
 					printf("BackupDevice: Could not create the backup save file.\n");
 				}
-				
+
 				delete out;
 			}
 		}
@@ -265,7 +265,7 @@ BackupDevice::BackupDevice()
 		{
 			printf("BackupDevice: Could not read the save file for creating a backup.\n");
 		}
-		
+
 		delete in;
 	}
 
@@ -333,7 +333,7 @@ BackupDevice::BackupDevice()
 		fpMC = new EMUFILE_MEMORY();
 		printf("BackupDevice: WARNING! Failed to get read/write access to the save file! Will operate in RAM instead.\n");
 	}
-	
+
 	if (!fpMC->fail())
 	{
 		fsize = fpMC->size();
@@ -347,7 +347,7 @@ BackupDevice::BackupDevice()
 			memset(&info, 0, sizeof(info));
 			fsize = 0;
 		}
-	
+
 		fpMC->fseek(0, SEEK_SET);
 
 		u32 left = 0;
@@ -383,7 +383,7 @@ BackupDevice::BackupDevice()
 		info.padSize = fsize;
 		//none of the other fields are used right now
 
-		if (CommonSettings.autodetectBackupMethod != 1 && info.type == 0) 
+		if (CommonSettings.autodetectBackupMethod != 1 && info.type == 0)
 		{
 			info.type = searchFileSaveType(info.size);
 			if (info.type == 0xFF) info.type = 0;
@@ -419,23 +419,23 @@ int BackupDevice::readFooter()
 	{
 		return -1;
 	}
-	
+
 	//scan for desmume save footer
 	const s32 cookieLen = (s32)strlen(kDesmumeSaveCookie);
 	char *sigbuf = new char[cookieLen];
-	
+
 	fpMC->fseek(-cookieLen, SEEK_END);
 	fpMC->fread(sigbuf, cookieLen);
 	int cmp = memcmp(sigbuf,kDesmumeSaveCookie,cookieLen);
 	delete[] sigbuf;
-	
+
 	if (cmp)
 		return -1;
 
 	//desmume format
 	fpMC->fseek(-cookieLen, SEEK_END);
 	fpMC->fseek(-4, SEEK_CUR);
-	
+
 	u32 version = 0xFFFFFFFF;
 	fpMC->read32le(&version);
 	if (version != 0)
@@ -462,7 +462,7 @@ u8 BackupDevice::read()
 {
 	u8 val = 0xFF;
 	fpMC->read8le(&val);
-	
+
 	return val;
 }
 
@@ -472,7 +472,7 @@ u8 BackupDevice::readByte(u32 addr, const u8 init)
 
 	fpMC->fseek(addr, SEEK_SET);
 	fpMC->read8le(&val);
-	
+
 	return val;
 }
 u16 BackupDevice::readWord(u32 addr, const u16 init)
@@ -481,7 +481,7 @@ u16 BackupDevice::readWord(u32 addr, const u16 init)
 
 	fpMC->fseek(addr, SEEK_SET);
 	fpMC->read16le(&val);
-	
+
 	return val;
 }
 u32 BackupDevice::readLong(u32 addr, const u32 init)
@@ -490,7 +490,7 @@ u32 BackupDevice::readLong(u32 addr, const u32 init)
 
 	fpMC->fseek(addr, SEEK_SET);
 	fpMC->read32le(&val);
-	
+
 	return val;
 }
 
@@ -498,21 +498,21 @@ u8 BackupDevice::readByte(const u8 init)
 {
 	u8 val = init;
 	fpMC->read8le(&val);
-	
+
 	return val;
 }
 u16 BackupDevice::readWord(const u16 init)
 {
 	u16 val = init;
 	fpMC->read16le(&val);
-	
+
 	return val;
 }
 u32 BackupDevice::readLong(const u32 init)
 {
 	u32 val = init;
 	fpMC->read32le(&val);
-	
+
 	return val;
 }
 
@@ -707,7 +707,7 @@ void BackupDevice::checkReset()
 
 		if(com == BM_CMD_WRITELOW || com == BM_CMD_WRITEHIGH)
 			fpMC->fflush();
-		
+
 		com = 0;
 		reset_command_state = false;
 	}
@@ -788,7 +788,7 @@ u8 BackupDevice::data_command(u8 val, u8 PROCNUM)
 						val = read();
 						//MCLOG("BACKUP: Read at 0x%08X, value 0x%02X\n", addr, val);
 					}
-					else 
+					else
 						if(write_enable)
 						{
 							write(val);
@@ -798,7 +798,7 @@ u8 BackupDevice::data_command(u8 val, u8 PROCNUM)
 				}
 			}
 		break;
-		
+
 		case BM_CMD_READSTATUS:
 			//handle request to read status
 			//LOG("Backup Memory Read Status: %02X\n", write_enable << 1);
@@ -839,7 +839,7 @@ u8 BackupDevice::data_command(u8 val, u8 PROCNUM)
 					break;
 				case 0xF8:
 					//enable sensor mode
-					if(motionInitState == MOTION_INIT_STATE_FD) 
+					if(motionInitState == MOTION_INIT_STATE_FD)
 					{
 						motionInitState = MOTION_INIT_STATE_IDLE;
 						motionFlag |= MOTION_FLAG_SENSORMODE;
@@ -848,7 +848,7 @@ u8 BackupDevice::data_command(u8 val, u8 PROCNUM)
 					break;
 				case 0xF9:
 					//disable sensor mode
-					if(motionInitState == MOTION_INIT_STATE_FD) 
+					if(motionInitState == MOTION_INIT_STATE_FD)
 					{
 						motionInitState = MOTION_INIT_STATE_IDLE;
 						motionFlag &= ~MOTION_FLAG_SENSORMODE;
@@ -859,7 +859,7 @@ u8 BackupDevice::data_command(u8 val, u8 PROCNUM)
 
 				case BM_CMD_IRDA:
 					printf("MC%c: Unverified Backup Memory command: %02X FROM %08X\n", PROCNUM?'7':'9', com, PROCNUM?NDS_ARM7.instruct_adr:NDS_ARM9.instruct_adr);
-					
+
 					val = 0xAA;
 					break;
 
@@ -874,7 +874,7 @@ u8 BackupDevice::data_command(u8 val, u8 PROCNUM)
 #endif
 					write_enable = FALSE;
 					break;
-								
+
 				case BM_CMD_READSTATUS: break;
 
 				case BM_CMD_WRITEENABLE:
@@ -938,7 +938,7 @@ void BackupDevice::ensure(u32 addr, u8 val, EMUFILE *fpOut)
 #ifndef _DONT_SAVE_BACKUP
 	fp->fseek(fsize, SEEK_SET);
 #endif
-	
+
 	u32 padSize = pad_up_size(addr);
 	u32 size = padSize - fsize;
 	info.padSize = info.size = fsize = padSize;
@@ -981,9 +981,9 @@ void BackupDevice::ensure(u32 addr, u8 val, EMUFILE *fpOut)
 u32 BackupDevice::addr_size_for_old_save_size(int bupmem_size)
 {
 	switch(bupmem_size) {
-		case MC_SIZE_4KBITS: 
+		case MC_SIZE_4KBITS:
 			return 1;
-		case MC_SIZE_64KBITS: 
+		case MC_SIZE_64KBITS:
 		case MC_SIZE_256KBITS:
 		case MC_SIZE_512KBITS:
 			return 2;
@@ -1117,7 +1117,7 @@ u32 BackupDevice::get_save_nogba_size(const char* fname)
 		if (src[0x1F] != 0x1A) { fclose(fsrc); return 0xFFFFFFFF; }
 		for (int i = 0; i < 0x4; i++)
 			if (src[i+0x40] != no_GBA_HEADER_SRAM_ID[i]) { fclose(fsrc); return 0xFFFFFFFF; }
-		
+
 		u32 compressMethod = *((u32*)(src+0x44));
 		if (compressMethod == 0)
 			{ fclose(fsrc); return *((u32*)(src+0x48)); }
@@ -1136,7 +1136,7 @@ u32 BackupDevice::get_save_nogba_size(u8 *data)
 	if (data[0x1F] != 0x1A) return 0xFFFFFFFF;
 	for (int i = 0; i < 0x4; i++)
 		if (data[i+0x40] != no_GBA_HEADER_SRAM_ID[i]) return 0xFFFFFFFF;
-	
+
 	u32 compressMethod = *((u32*)(data+0x44));
 	if (compressMethod == 0)
 		return *((u32*)(data+0x48));
@@ -1192,8 +1192,8 @@ static int no_gba_unpackSAV(void *in_buf, u32 fsize, void *out_buf, u32 &size)
 		while (true)
 		{
 			cc = src[src_pos++];
-			
-			if (cc == 0) 
+
+			if (cc == 0)
 			{
 				size = dst_pos;
 				return (0);
@@ -1384,16 +1384,16 @@ u32 BackupDevice::pad_up_size(u32 startSize)
 {
 	u32 size = startSize;
 	u32 ctr=0;
-	
+
 	while ((ctr < saveSizes_count) && (size > saveSizes[ctr])) ctr++;
-	
+
 	u32 padSize = saveSizes[ctr];
 	if(padSize == 0xFFFFFFFF)
 	{
 		printf("PANIC! Couldn't pad up save size. Refusing to pad.\n");
 		padSize = startSize;
 	}
-	
+
 	return padSize;
 }
 
@@ -1441,7 +1441,7 @@ bool BackupDevice::import_raw(const char* filename, u32 force_size)
 	fseek(inf, 0, SEEK_END);
 	u32 size = (u32)ftell(inf);
 	u32 left = 0;
-	
+
 	if (force_size > 0)
 	{
 		if (size > force_size)

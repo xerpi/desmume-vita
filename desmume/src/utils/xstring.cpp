@@ -21,10 +21,14 @@
 #include "xstring.h"
 #include <string>
 
+#if defined(__vita__)
+#  define throw return NULL; //
+#endif
+
 //a vc-style substring operation (very kind and lenient)
 std::string strsub(const std::string& str, int pos, int len) {
 	int strlen = str.size();
-	
+
 	if(strlen==0) return str; //empty strings always return empty strings
 	if(pos>=strlen) return str; //if you start past the end of the string, return the entire string. this is unusual, but there you have it
 
@@ -36,7 +40,7 @@ std::string strsub(const std::string& str, int pos, int len) {
 
 	if (pos+len>=strlen)
 		len=strlen-pos+1;
-	
+
 	//return str.str().substr(pos,len);
 	return str.substr(pos,len);
 }
@@ -233,7 +237,7 @@ static const struct Base64Table
 		data[62] = '+';                             // 62
 		data[63] = '/';                             // 63
 		// create ascii->value mapping (but due to overlap, write it to highbit region)
-		for(a=0; a<64; ++a) data[data[a]^0x80] = a; // 
+		for(a=0; a<64; ++a) data[data[a]^0x80] = a; //
 		data[((unsigned char)'=') ^ 0x80] = 0;
 	}
 	unsigned char operator[] (size_t pos) const { return data[pos]; }
@@ -260,9 +264,9 @@ std::string BytesToString(const void* data, int len)
 		return temp;
 	} else if(len==4) {
 		sprintf(temp,"%d",*(const unsigned int*)data);
-		return temp;		
+		return temp;
 	}
-	
+
 	std::string ret;
 	if(1) // use base64
 	{
@@ -314,7 +318,7 @@ int HexStringToBytesLength(const std::string& str)
 int Base64StringToBytesLength(const std::string& str)
 {
 	if(str.size() < 7 || (str.size()-7) % 4 || str.substr(0,7) != "base64:") return -1;
-	
+
 	size_t c = ((str.size() - 7) / 4) * 3;
 	if(str[str.size()-1] == '=') { --c;
 	if(str[str.size()-2] == '=') --c; }
@@ -369,12 +373,12 @@ bool StringToBytes(const std::string& str, void* data, int len)
 			else a-='0';
 			if(b>='A') b=b-'A'+10;
 			else b-='0';
-			unsigned char val = ((unsigned char)a<<4)|(unsigned char)b; 
+			unsigned char val = ((unsigned char)a<<4)|(unsigned char)b;
 			((unsigned char*)data)[i] = val;
 		}
 		return true;
 	}
-	
+
 	if(len==1) {
 		int x = atoi(str.c_str());
 		*(unsigned char*)data = x;
@@ -592,7 +596,7 @@ std::string readNullTerminatedAscii(std::istream* is)
 {
 	std::string ret;
 	ret.reserve(50);
-	for(;;) 
+	for(;;)
 	{
 		int c = is->get();
 		if(c == 0) break;
@@ -713,15 +717,19 @@ namespace UtfConverter
         return "";
     }
 }
-  
+
 //convert a std::string to std::wstring
 std::wstring mbstowcs(std::string str)
 {
+#if defined(__vita__)
+	return UtfConverter::FromUtf8(str);
+#else
 	try {
 		return UtfConverter::FromUtf8(str);
 	} catch(std::exception) {
 		return L"(failed UTF-8 conversion)";
 	}
+#endif
 }
 
 std::string wcstombs(std::wstring str)

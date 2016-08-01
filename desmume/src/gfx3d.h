@@ -260,7 +260,7 @@ struct POLY {
 		if(d != -1) { vertIndexes[3] = d; type = POLYGON_TYPE_QUAD; }
 		else type = POLYGON_TYPE_TRIANGLE;
 	}
-	
+
 	u8 getAttributeEnableLightFlags() const
 	{
 		return ((polyAttr & (POLYGON_ATTR_ENABLE_LIGHT0_MASK |
@@ -268,87 +268,87 @@ struct POLY {
 							 POLYGON_ATTR_ENABLE_LIGHT2_MASK |
 							 POLYGON_ATTR_ENABLE_LIGHT3_MASK)) >> POLYGON_ATTR_ENABLE_LIGHT0_BIT);
 	}
-	
+
 	bool getAttributeEnableLight0() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_LIGHT0_MASK) > 0);
 	}
-	
+
 	bool getAttributeEnableLight1() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_LIGHT1_MASK) > 0);
 	}
-	
+
 	bool getAttributeEnableLight2() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_LIGHT2_MASK) > 0);
 	}
-	
+
 	bool getAttributeEnableLight3() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_LIGHT3_MASK) > 0);
 	}
-	
+
 	PolygonMode getAttributePolygonMode() const
 	{
 		return (PolygonMode)((polyAttr & POLYGON_ATTR_MODE_MASK) >> POLYGON_ATTR_MODE_BIT);
 	}
-	
+
 	u8 getAttributeEnableFaceCullingFlags() const
 	{
 		return ((polyAttr & (POLYGON_ATTR_ENABLE_BACK_SURFACE_MASK |
 							 POLYGON_ATTR_ENABLE_FRONT_SURFACE_MASK)) >> POLYGON_ATTR_ENABLE_BACK_SURFACE_BIT);
 	}
-	
+
 	bool getAttributeEnableBackSurface() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_BACK_SURFACE_MASK) > 0);
 	}
-	
+
 	bool getAttributeEnableFrontSurface() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_FRONT_SURFACE_MASK) > 0);
 	}
-	
+
 	bool getAttributeEnableAlphaDepthWrite() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_ALPHA_DEPTH_WRITE_MASK) > 0);
 	}
-	
+
 	bool getAttributeEnableRenderOnFarPlaneIntersect() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_RENDER_ON_FAR_PLANE_INTERSECT_MASK) > 0);
 	}
-	
+
 	bool getAttributeEnableOneDotRender() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_ONE_DOT_RENDER_MASK) > 0);
 	}
-	
+
 	bool getAttributeEnableDepthEqualTest() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_DEPTH_EQUAL_TEST_MASK) > 0);
 	}
-	
+
 	bool getAttributeEnableFog() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ENABLE_FOG_MASK) > 0);
 	}
-	
+
 	u8 getAttributeAlpha() const
 	{
 		return ((polyAttr & POLYGON_ATTR_ALPHA_MASK) >> POLYGON_ATTR_ALPHA_BIT);
 	}
-	
+
 	u8 getAttributePolygonID() const
 	{
 		return ((polyAttr & POLYGON_ATTR_POLYGON_ID_MASK) >> POLYGON_ATTR_POLYGON_ID_BIT);
 	}
-	
+
 	PolygonAttributes getAttributes() const
 	{
 		PolygonAttributes theAttr;
-		
+
 		theAttr.enableLightFlags				= this->getAttributeEnableLightFlags();
 		theAttr.enableLight0					= this->getAttributeEnableLight0();
 		theAttr.enableLight1					= this->getAttributeEnableLight1();
@@ -368,64 +368,64 @@ struct POLY {
 		theAttr.isOpaque						= this->isOpaque();
 		theAttr.isTranslucent					= this->isTranslucent();
 		theAttr.polygonID						= this->getAttributePolygonID();
-		
+
 		return theAttr;
 	}
-	
+
 	u16 getTexParamVRAMOffset() const
 	{
 		return ((texParam & TEXTURE_PARAM_VRAM_OFFSET_MASK) >> TEXTURE_PARAM_VRAM_OFFSET_BIT);
 	}
-	
+
 	bool getTexParamEnableRepeatS() const
 	{
 		return ((texParam & TEXTURE_PARAM_ENABLE_REPEAT_S_MASK) > 0);
 	}
-	
+
 	bool getTexParamEnableRepeatT() const
 	{
 		return ((texParam & TEXTURE_PARAM_ENABLE_REPEAT_T_MASK) > 0);
 	}
-	
+
 	bool getTexParamEnableMirroredRepeatS() const
 	{
 		return ((texParam & TEXTURE_PARAM_ENABLE_MIRRORED_REPEAT_S_MASK) > 0);
 	}
-	
+
 	bool getTexParamEnableMirroredRepeatT() const
 	{
 		return ((texParam & TEXTURE_PARAM_ENABLE_MIRRORED_REPEAT_T_MASK) > 0);
 	}
-	
+
 	u8 getTexParamSizeS() const
 	{
 		return ((texParam & TEXTURE_PARAM_SIZE_S_MASK) >> TEXTURE_PARAM_SIZE_S_BIT);
 	}
-	
+
 	u8 getTexParamSizeT() const
 	{
 		return ((texParam & TEXTURE_PARAM_SIZE_T_MASK) >> TEXTURE_PARAM_SIZE_T_BIT);
 	}
-	
+
 	u8 getTexParamTexFormat() const
 	{
 		return ((texParam & TEXTURE_PARAM_FORMAT_MASK) >> TEXTURE_PARAM_FORMAT_BIT);
 	}
-	
+
 	bool getTexParamEnableTransparentColor0() const
 	{
 		return ((texParam & TEXTURE_PARAM_ENABLE_TRANSPARENT_COLOR0_MASK) > 0);
 	}
-	
+
 	u8 getTexParamCoordTransformMode() const
 	{
 		return ((texParam & TEXTURE_PARAM_COORD_TRANSFORM_MODE_MASK) >> TEXTURE_PARAM_COORD_TRANSFORM_MODE_BIT);
 	}
-	
+
 	PolygonTexParams getTexParams() const
 	{
 		PolygonTexParams theTexParams;
-		
+
 		theTexParams.VRAMOffset					= this->getTexParamVRAMOffset();
 		theTexParams.enableRepeatS				= this->getTexParamEnableRepeatS();
 		theTexParams.enableRepeatT				= this->getTexParamEnableRepeatT();
@@ -436,20 +436,20 @@ struct POLY {
 		theTexParams.texFormat					= this->getTexParamTexFormat();
 		theTexParams.enableTransparentColor0	= this->getTexParamEnableTransparentColor0();
 		theTexParams.coordTransformMode			= this->getTexParamCoordTransformMode();
-		
+
 		return theTexParams;
 	}
-	
+
 	bool isWireframe() const
 	{
 		return (this->getAttributeAlpha() == 0);
 	}
-	
+
 	bool isOpaque() const
 	{
 		return (this->getAttributeAlpha() == 31);
 	}
-	
+
 	bool isTranslucent() const
 	{
 		// First, check if the polygon is wireframe or opaque.
@@ -458,22 +458,26 @@ struct POLY {
 		{
 			return true;
 		}
-		
+
 		// Also check for translucent texture format.
 		u8 texFormat = this->getTexParamTexFormat();
-		
+
 		//a5i3 or a3i5 -> translucent
-		if(texFormat == TEXMODE_A3I5 || texFormat == TEXMODE_A5I3) 
+		if(texFormat == TEXMODE_A3I5 || texFormat == TEXMODE_A5I3)
 			return true;
-		
+
 		return false;
 	}
-	
+
 	void save(EMUFILE* os);
 	void load(EMUFILE* is);
 };
 
+#if defined(__vita__)
+#define POLYLIST_SIZE 4096
+#else
 #define POLYLIST_SIZE 20000
+#endif
 struct POLYLIST {
 	POLY list[POLYLIST_SIZE];
 	size_t count;
@@ -492,11 +496,11 @@ struct VERT_POS4f
 		} position;
 	};
 	void set_coord(float x, float y, float z, float w)
-	{ 
-		this->x = x; 
-		this->y = y; 
-		this->z = z; 
-		this->w = w; 
+	{
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		this->w = w;
 	}
 };
 
@@ -516,13 +520,13 @@ struct VERT {
 			float u,v;
 		};
 	} CACHE_ALIGN;
-	void set_coord(float x, float y, float z, float w) { 
-		this->x = x; 
-		this->y = y; 
-		this->z = z; 
-		this->w = w; 
+	void set_coord(float x, float y, float z, float w) {
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		this->w = w;
 	}
-	void set_coord(float* coords) { 
+	void set_coord(float* coords) {
 		x = coords[0];
 		y = coords[1];
 		z = coords[2];
@@ -567,7 +571,7 @@ struct VIEWPORT {
 class GFX3D_Clipper
 {
 public:
-	
+
 	struct TClippedPoly
 	{
 		PolygonType type; //otherwise known as "count" of verts
@@ -622,8 +626,8 @@ struct GFX3D_State
 	}
 
 	IOREG_DISP3DCNT savedDISP3DCNT;
-	
-	BOOL enableTexturing, enableAlphaTest, enableAlphaBlending, 
+
+	BOOL enableTexturing, enableAlphaTest, enableAlphaBlending,
 		enableAntialiasing, enableEdgeMarking, enableClearImage, enableFog, enableFogAlphaOnly;
 
 	u32 shading;
@@ -680,7 +684,7 @@ struct GFX3D
 	POLYLIST* polylist;
 	VERTLIST* vertlist;
 	INDEXLIST indexlist;
-	
+
 	u32 _videoFrameCount;			// Internal variable that increments when a video frame is completed. Resets every 60 video frames.
 	u32 render3DFrameCount;			// Increments when gfx3d_doFlush() is called. Resets every 60 video frames.
 };

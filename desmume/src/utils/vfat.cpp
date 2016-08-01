@@ -65,7 +65,7 @@ static void list_files(const char *filepath, ListCallback list_callback)
 		const char* fname = retro_dirent_get_name(rdir);
 		list_callback(rdir,EListCallbackArg_Item);
 
-		if(retro_dirent_is_dir(rdir) && (strcmp(fname, ".")) && (strcmp(fname, ".."))) 
+		if(retro_dirent_is_dir(rdir) && (strcmp(fname, ".")) && (strcmp(fname, "..")))
 		{
 			std::string subdir = (std::string)filepath + path_default_slash() + fname;
 			list_files(subdir.c_str(), list_callback);
@@ -90,7 +90,7 @@ void count_ListCallback(RDIR* rdir, EListCallbackArg arg)
 		int32_t fileSize = path_get_size(retro_dirent_get_name(rdir));
 		sectors += (fileSize+511)/512 + 1;
 	}
-	dataSectors += sectors; 
+	dataSectors += sectors;
 }
 
 static std::string currPath;
@@ -101,7 +101,7 @@ void build_ListCallback(RDIR* rdir, EListCallbackArg arg)
 {
 	const char* fname = retro_dirent_get_name(rdir);
 
-	if(arg == EListCallbackArg_Pop) 
+	if(arg == EListCallbackArg_Pop)
 	{
 		currPath = pathStack.top();
 		pathStack.pop();
@@ -109,7 +109,7 @@ void build_ListCallback(RDIR* rdir, EListCallbackArg arg)
 		virtPathStack.pop();
 		return;
 	}
-	
+
 	if(retro_dirent_is_dir(rdir))
 	{
 		if(!strcmp(fname,".")) return;
@@ -144,12 +144,12 @@ void build_ListCallback(RDIR* rdir, EListCallbackArg arg)
 			std::string path = currVirtPath + "/" + fname;
 			printf("FAT + (%10.2f KB) %s \n",len/1024.f,path.c_str());
 			bool ok = LIBFAT::WriteFile(path.c_str(),buf,len);
-			if(!ok) 
+			if(!ok)
 				printf("ERROR adding file to fat\n");
 			delete[] buf;
 		} else printf("ERROR opening file for fat\n");
 	}
-		
+
 }
 
 
@@ -176,9 +176,9 @@ bool VFAT::build(const char* path, int extra_MB)
 		printf("error allocating memory for fat (%d KBytes)\n",(dataSectors*512)/1024);
 		printf("total fat sizes > 2GB are never going to work\n");
 	}
-	
+
 	delete file;
-	try 
+	try
 	{
 		file = new EMUFILE_MEMORY(dataSectors*512);
 	}
@@ -191,7 +191,7 @@ bool VFAT::build(const char* path, int extra_MB)
 
 	//debug..
 	//file = new EMUFILE_FILE("c:\\temp.ima","rb+");
-	
+
 	//format the disk
 	{
 		EmuFat fat(file);

@@ -27,7 +27,7 @@
 		#include "windows/winutil.h"
 		#include "windows/resource.h"
 	#endif
-#elif !defined(DESMUME_COCOA)
+#elif !defined(DESMUME_COCOA) && !defined(__vita__)
 	#include <glib.h>
 #endif /* HOST_WINDOWS */
 
@@ -94,7 +94,7 @@ public:
 		FIRSTKNOWNPATH = 0,
 		ROMS = 0,
 		BATTERY,
-		STATES, 
+		STATES,
 		SCREENSHOTS,
 		AVI_FILES,
 		CHEATS,
@@ -117,7 +117,7 @@ public:
 	char pathToLua[MAX_PATH];
 	char pathToSlot1D[MAX_PATH];
 
-	void init(const char *filename) 
+	void init(const char *filename)
 	{
 		path = std::string(filename);
 
@@ -128,7 +128,7 @@ public:
 #if !defined(WIN32) && !defined(DESMUME_COCOA)
 		ReadPathSettings();
 #endif
-		
+
 	}
 
 	void LoadModulePath()
@@ -154,6 +154,8 @@ public:
 		std::string pathStr = Path::GetFileDirectoryPath(path);
 
 		strncpy(pathToModule, pathStr.c_str(), MAX_PATH);
+#elif defined(__vita__)
+		strncpy(pathToModule, "desmume", MAX_PATH);
 #else
 		char *cwd = g_build_filename(g_get_user_config_dir(), "desmume", NULL);
 		g_mkdir_with_parents(cwd, 0755);
@@ -268,15 +270,15 @@ public:
 		{
 			std::string thePath = pathToCopy;
 			std::string relativePath = (std::string)"." + DIRECTORY_DELIMITER_CHAR;
-			
+
 			int len = (int)thePath.size()-1;
 
 			if(len == -1)
 				thePath = relativePath;
-			else 
-				if(thePath[len] != DIRECTORY_DELIMITER_CHAR) 
+			else
+				if(thePath[len] != DIRECTORY_DELIMITER_CHAR)
 					thePath += DIRECTORY_DELIMITER_CHAR;
-	
+
 			if(!Path::IsPathRooted(thePath))
 			{
 				thePath = (std::string)pathToModule + thePath;
@@ -290,7 +292,7 @@ public:
 		else if(action == SET)
 		{
 			int len = strlen(buffer)-1;
-			if(buffer[len] == DIRECTORY_DELIMITER_CHAR) 
+			if(buffer[len] == DIRECTORY_DELIMITER_CHAR)
 				buffer[len] = '\0';
 
 			strncpy(pathToCopy, buffer, MAX_PATH);
@@ -333,7 +335,7 @@ public:
 	std::string noextension()
 	{
 		std::string romNameWithPath = Path::GetFileDirectoryPath(path) + DIRECTORY_DELIMITER_CHAR + Path::GetFileNameWithoutExt(RomName);
-		
+
 		return romNameWithPath;
 	}
 
@@ -439,15 +441,15 @@ public:
 	bool isdsgba(std::string fileName)
 	{
 		size_t i = fileName.find_last_of(FILE_EXT_DELIMITER_CHAR);
-		
+
 		if (i != std::string::npos) {
 			fileName = fileName.substr(i - 2);
 		}
-		
+
 		if(fileName == "ds.gba") {
 			return true;
 		}
-		
+
 		return false;
 	}
 };

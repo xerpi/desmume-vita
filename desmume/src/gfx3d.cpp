@@ -1,4 +1,4 @@
-/*	
+/*
 	Copyright (C) 2006 yopyop
 	Copyright (C) 2008-2015 DeSmuME team
 
@@ -116,11 +116,11 @@ public:
 		paramCounter = 0;
 	}
 
-	void receive(u32 val) 
+	void receive(u32 val)
 	{
-		//so, it seems as if the dummy values and restrictions on the highest-order command in the packed command set 
+		//so, it seems as if the dummy values and restrictions on the highest-order command in the packed command set
 		//is solely about some unknown internal timing quirk, and not about the logical behaviour of the state machine.
-		//it's possible that writing some values too quickly can result in the gxfifo not being ready. 
+		//it's possible that writing some values too quickly can result in the gxfifo not being ready.
 		//this would be especially troublesome when they're getting DMA'd nonstop with no delay.
 		//so, since the timing is not emulated rigorously here, and only the logic, we shouldn't depend on or expect the dummy values.
 		//indeed, some games aren't issuing them, and will break if they are expected.
@@ -190,7 +190,7 @@ public:
 				//break when the current command is invalid. 0x00 is invalid; this is what gets used to terminate a loop after all the commands are handled
 				break;
 			}
-			else 
+			else
 			{
 				paramCounter = currCommandType;
 				break;
@@ -211,7 +211,7 @@ public:
 		write32le(shiftCommand,f);
 		write32le(paramCounter,f);
 	}
-	
+
 	bool loadstate(EMUFILE *f)
 	{
 		u32 version;
@@ -251,7 +251,7 @@ public:
 } gxf_hardware;
 
 //these were 4 for the longest time (this is MUCH, MUCH less than their theoretical values)
-//but it was changed to 1 for strawberry shortcake, which was issuing direct commands 
+//but it was changed to 1 for strawberry shortcake, which was issuing direct commands
 //while the fifo was full, apparently expecting the fifo not to be full by that time.
 //in general we are finding that 3d takes less time than we think....
 //although maybe the true culprit was charging the cpu less time for the dma.
@@ -493,21 +493,21 @@ void gfx3d_init()
 		polylists = (POLYLIST *)malloc(sizeof(POLYLIST)*2);
 		polylist = &polylists[0];
 	}
-	
+
 	if(vertlists == NULL)
 	{
 		vertlists = (VERTLIST *)malloc(sizeof(VERTLIST)*2);
 		vertlist = &vertlists[0];
 	}
-	
+
 	gfx3d.state.savedDISP3DCNT.value = 0;
 	gfx3d.state.fogDensityTable = MMU.ARM9_REG+0x0360;
 	gfx3d.state.edgeMarkColorTable = (u16 *)(MMU.ARM9_REG+0x0330);
-	
+
 	gfx3d._videoFrameCount = 0;
 	gfx3d.render3DFrameCount = 0;
 	Render3DFramesPerSecond = 0;
-	
+
 	makeTables();
 	Render3D_Init();
 }
@@ -515,11 +515,11 @@ void gfx3d_init()
 void gfx3d_deinit()
 {
 	Render3D_DeInit();
-	
+
 	free(polylists);
 	polylists = NULL;
 	polylist = NULL;
-	
+
 	free(vertlists);
 	vertlists = NULL;
 	vertlist = NULL;
@@ -528,7 +528,7 @@ void gfx3d_deinit()
 void gfx3d_reset()
 {
 	CurrentRenderer->RenderFinish();
-	
+
 #ifdef _SHOW_VTX_COUNTERS
 	max_polys = max_verts = 0;
 #endif
@@ -536,7 +536,7 @@ void gfx3d_reset()
 	reconstruct(&gfx3d);
 	delete viewer3d_state;
 	viewer3d_state = new Viewer3d_State();
-	
+
 	gxf_hardware.reset();
 
 	drawPending = FALSE;
@@ -597,17 +597,17 @@ void gfx3d_reset()
 	viewport = 0xBFFF0000;
 
 	gfx3d.state.clearDepth = DS_DEPTH15TO24(0x7FFF);
-	
+
 	clInd2 = 0;
 	isSwapBuffers = FALSE;
 
 	GFX_PIPEclear();
 	GFX_FIFOclear();
-	
+
 	gfx3d._videoFrameCount = 0;
 	gfx3d.render3DFrameCount = 0;
 	Render3DFramesPerSecond = 0;
-	
+
 	CurrentRenderer->Reset();
 }
 
@@ -643,23 +643,23 @@ static void SetVertex()
 	if (texCoordinateTransform == 3)
 	{
 		//Tested by: Eledees The Adventures of Kai and Zero (E) [title screen and frontend menus]
-		last_s = (s32)(((s64)s16coord[0] * mtxCurrent[3][0] + 
-								(s64)s16coord[1] * mtxCurrent[3][4] + 
-								(s64)s16coord[2] * mtxCurrent[3][8] + 
+		last_s = (s32)(((s64)s16coord[0] * mtxCurrent[3][0] +
+								(s64)s16coord[1] * mtxCurrent[3][4] +
+								(s64)s16coord[2] * mtxCurrent[3][8] +
 								(((s64)(_s))<<24))>>24);
-		last_t = (s32)(((s64)s16coord[0] * mtxCurrent[3][1] + 
-								(s64)s16coord[1] * mtxCurrent[3][5] + 
-								(s64)s16coord[2] * mtxCurrent[3][9] + 
+		last_t = (s32)(((s64)s16coord[0] * mtxCurrent[3][1] +
+								(s64)s16coord[1] * mtxCurrent[3][5] +
+								(s64)s16coord[2] * mtxCurrent[3][9] +
 								(((s64)(_t))<<24))>>24);
 	}
 
 	//refuse to do anything if we have too many verts or polys
 	polygonListCompleted = 0;
-	if(vertlist->count >= VERTLIST_SIZE) 
+	if(vertlist->count >= VERTLIST_SIZE)
 			return;
-	if(polylist->count >= POLYLIST_SIZE) 
+	if(polylist->count >= POLYLIST_SIZE)
 			return;
-	
+
 	//TODO - think about keeping the clip matrix concatenated,
 	//so that we only have to multiply one matrix here
 	//(we could lazy cache the concatenated clip matrix and only generate it
@@ -686,11 +686,11 @@ static void SetVertex()
 	{
 		printf("wtf\n");
 	}
-	
+
 	VERT &vert = vertlist->list[vertIndex];
 
 	//printf("%f %f %f\n",coordTransformed[0],coordTransformed[1],coordTransformed[2]);
-	//if(coordTransformed[1] > 20) 
+	//if(coordTransformed[1] > 20)
 	//	coordTransformed[1] = 20;
 
 	//printf("y-> %f\n",coord[1]);
@@ -731,7 +731,7 @@ static void SetVertex()
 				polylist->list[polylist->count].type = POLYGON_TYPE_TRIANGLE;
 				tempVertInfo.count = 0;
 				break;
-				
+
 			case GFX3D_QUADS:
 				if(tempVertInfo.count!=4)
 					break;
@@ -744,7 +744,7 @@ static void SetVertex()
 				polylist->list[polylist->count].type = POLYGON_TYPE_QUAD;
 				tempVertInfo.count = 0;
 				break;
-				
+
 			case GFX3D_TRIANGLE_STRIP:
 				if(tempVertInfo.count!=3)
 					break;
@@ -758,7 +758,7 @@ static void SetVertex()
 					tempVertInfo.map[1] = vertlist->count+2-continuation;
 				else
 					tempVertInfo.map[0] = vertlist->count+2-continuation;
-				
+
 				if(tempVertInfo.first)
 					vertlist->count+=3;
 				else
@@ -768,7 +768,7 @@ static void SetVertex()
 				tempVertInfo.first = false;
 				tempVertInfo.count = 2;
 				break;
-				
+
 			case GFX3D_QUAD_STRIP:
 				if(tempVertInfo.count!=4)
 					break;
@@ -786,15 +786,15 @@ static void SetVertex()
 				tempVertInfo.first = false;
 				tempVertInfo.count = 2;
 				break;
-				
-			default: 
+
+			default:
 				return;
 		}
 
 		if (polygonListCompleted == 1)
 		{
 			POLY &poly = polylist->list[polylist->count];
-			
+
 			poly.vtxFormat = vtxFormat;
 
 			// Line segment detect
@@ -910,7 +910,7 @@ static void gfx3d_glPushMatrix()
 
 static void gfx3d_glPopMatrix(s32 i)
 {
-	// The stack has only one level (at address 0) in projection mode, 
+	// The stack has only one level (at address 0) in projection mode,
 	// in that mode, the parameter value is ignored, the offset is always +1 in that mode.
 	if (mode == MATRIXMODE_PROJECTION) i = 1;
 
@@ -922,7 +922,7 @@ static void gfx3d_glPopMatrix(s32 i)
 	//example:
 	//suppose we had a -30 that would be %100010.
 	//which is the same as adding 34. if our stack was at 17 then one way is 17-30(+32)=19 and the other way is 17+34(-32)=19
-	
+
 	//please note that our ability to skip treating this as signed is dependent on the modular addressing later. if that ever changes, we need to change this back.
 
 	MatrixStackPopMatrix(mtxCurrent[mymode], &mtxStack[mymode], i);
@@ -1103,7 +1103,7 @@ static BOOL gfx3d_glMultMatrix4x3(s32 v)
 static BOOL gfx3d_glMultMatrix3x3(s32 v)
 {
 	mtxTemporal[MM3x3ind] = v;
-	
+
 	MM3x3ind++;
 	if ((MM3x3ind & 0x03) == 3) MM3x3ind++;
 	if (MM3x3ind<12) return FALSE;
@@ -1241,7 +1241,7 @@ static void gfx3d_glNormal(s32 v)
 		//This formula is the one used by the DS
 		//Reference : http://nocash.emubase.de/gbatek.htm#ds3dpolygonlightparameters
 		s32 fixed_diffuse = std::max(0,-vec3dot_fixed32(cacheLightDirection[i],normal));
-		
+
 		//todo - this could be cached in this form
 		s32 fixedTempNegativeHalf[] = {-cacheHalfVector[i][0],-cacheHalfVector[i][1],-cacheHalfVector[i][2],-cacheHalfVector[i][3]};
 		s32 dot = vec3dot_fixed32(fixedTempNegativeHalf, normal);
@@ -1260,7 +1260,7 @@ static void gfx3d_glNormal(s32 v)
 		//even without a table, failure to saturate is bad news
 		fixedshininess = std::min(fixedshininess,4095);
 		fixedshininess = std::max(fixedshininess,0);
-		
+
 		if (dsSpecular & 0x8000)
 		{
 			//shininess is 20.12 fixed point, so >>5 gives us .7 which is 128 entries
@@ -1498,7 +1498,7 @@ static BOOL gfx3d_glBoxTest(u32 v)
 	GFX_DELAY(103);
 
 #if 0
-	INFO("BoxTEST: x %f y %f width %f height %f depth %f\n", 
+	INFO("BoxTEST: x %f y %f width %f height %f depth %f\n",
 				BTcoords[0], BTcoords[1], BTcoords[2], BTcoords[3], BTcoords[4], BTcoords[5]);
 	/*for (int i = 0; i < 16; i++)
 	{
@@ -1541,7 +1541,7 @@ static BOOL gfx3d_glBoxTest(u32 v)
 
 	//craft the faces of the box (clockwise)
 	POLY polys[6];
-	polys[0].setVertIndexes(7,6,5,4); //near 
+	polys[0].setVertIndexes(7,6,5,4); //near
 	polys[1].setVertIndexes(0,1,2,3); //far
 	polys[2].setVertIndexes(0,3,7,4); //left
 	polys[3].setVertIndexes(6,2,1,5); //right
@@ -1556,7 +1556,7 @@ static BOOL gfx3d_glBoxTest(u32 v)
 	////-----------------------------
 	////awesome hack:
 	////emit the box as geometry for testing
-	//for(int i=0;i<6;i++) 
+	//for(int i=0;i<6;i++)
 	//{
 	//	POLY* poly = &polys[i];
 	//	VERT* vertTable[4] = {
@@ -1605,7 +1605,7 @@ static BOOL gfx3d_glBoxTest(u32 v)
 		};
 
 		boxtestClipper.clipPoly<false>(thePoly, vertTable);
-		
+
 		//if any portion of this poly was retained, then the test passes.
 		if (boxtestClipper.clippedPolyCounter > 0)
 		{
@@ -1619,7 +1619,7 @@ static BOOL gfx3d_glBoxTest(u32 v)
 	{
 		//printf("%06d FAIL %d\n",boxcounter,gxFIFO.size);
 	}
-	
+
 	return TRUE;
 }
 
@@ -1636,7 +1636,7 @@ static BOOL gfx3d_glPosTest(u32 v)
 
 	if (PTind < 3) return FALSE;
 	PTind = 0;
-	
+
 	PTcoords[3] = 1.0f;
 
 	CACHE_ALIGN float temp1[16] = {mtxCurrent[1][0]/4096.0f,mtxCurrent[1][1]/4096.0f,mtxCurrent[1][2]/4096.0f,mtxCurrent[1][3]/4096.0f,mtxCurrent[1][4]/4096.0f,mtxCurrent[1][5]/4096.0f,mtxCurrent[1][6]/4096.0f,mtxCurrent[1][7]/4096.0f,mtxCurrent[1][8]/4096.0f,mtxCurrent[1][9]/4096.0f,mtxCurrent[1][10]/4096.0f,mtxCurrent[1][11]/4096.0f,mtxCurrent[1][12]/4096.0f,mtxCurrent[1][13]/4096.0f,mtxCurrent[1][14]/4096.0f,mtxCurrent[1][15]/4096.0f};
@@ -2038,7 +2038,7 @@ void gfx3d_execute3D()
 			//since we did anything at all, incur a pipeline motion cost.
 			//also, we can't let gxfifo sequencer stall until the fifo is empty.
 			//see...
-			GFX_DELAY(1); 
+			GFX_DELAY(1);
 
 			//..these guys will ordinarily set a delay, but multi-param operations won't
 			//for the earlier params.
@@ -2047,7 +2047,7 @@ void gfx3d_execute3D()
 
 			//this is a COMPATIBILITY HACK.
 			//this causes 3d to take virtually no time whatsoever to execute.
-			//this was done for marvel nemesis, but a similar family of 
+			//this was done for marvel nemesis, but a similar family of
 			//hacks for ridiculously fast 3d execution has proven necessary for a number of games.
 			//the true answer is probably dma bus blocking.. but lets go ahead and try this and
 			//check the compatibility, at the very least it will be nice to know if any games suffer from
@@ -2068,11 +2068,11 @@ void gfx3d_glFlush(u32 v)
 		INFO("Error: swapBuffers already use\n");
 	}
 #endif
-	
+
 	isSwapBuffers = TRUE;
 
 	//printf("%05d:%03d:%12lld: FLUSH\n",currFrameCounter, nds.VCount, nds_timer);
-	
+
 	//well, the game wanted us to flush.
 	//it may be badly timed. lets just flush it.
 #ifdef FLUSHMODE_HACK
@@ -2088,9 +2088,9 @@ static inline bool gfx3d_ysort_compare_orig(int num1, int num2)
 	const POLY &poly2 = polylist->list[num2];
 
 	if (poly1.maxy != poly2.maxy)
-		return poly1.maxy < poly2.maxy; 
+		return poly1.maxy < poly2.maxy;
 	if (poly1.miny != poly2.miny)
-		return poly1.miny < poly2.miny; 
+		return poly1.miny < poly2.miny;
 
 	return num1 < num2;
 }
@@ -2138,17 +2138,17 @@ static void gfx3d_doFlush()
 	gfx3d.state.wbuffer = BIT1(gfx3d.state.activeFlushCommand);
 
 	gfx3d.renderState = gfx3d.state;
-	
+
 	// Override render states per user settings
 	if (!CommonSettings.GFX3D_Texture)
 		gfx3d.renderState.enableTexturing = false;
-	
+
 	if (!CommonSettings.GFX3D_EdgeMark)
 		gfx3d.renderState.enableEdgeMarking = false;
-	
+
 	if (!CommonSettings.GFX3D_Fog)
 		gfx3d.renderState.enableFog = false;
-	
+
 	gfx3d.state.activeFlushCommand = gfx3d.state.pendingFlushCommand;
 
 	const size_t polycount = polylist->count;
@@ -2197,7 +2197,7 @@ static void gfx3d_doFlush()
 			gfx3d.indexlist.list[ctr++] = i;
 	}
 	const size_t opaqueCount = ctr;
-	
+
 	//then look for translucent polys
 	for (size_t i = 0; i < polycount; i++)
 	{
@@ -2205,7 +2205,7 @@ static void gfx3d_doFlush()
 		if (poly.isTranslucent())
 			gfx3d.indexlist.list[ctr++] = i;
 	}
-	
+
 	//NOTE: the use of the stable_sort below must be here as a workaround for some compilers on osx and linux.
 	//we're hazy on the exact behaviour of the resulting bug, all thats known is the list gets mangled somehow.
 	//it should not in principle be relevant since the predicate results in no ties.
@@ -2215,7 +2215,7 @@ static void gfx3d_doFlush()
 	//(test case: harvest moon island of happiness character cretor UI)
 	//should this be done after clipping??
 	std::stable_sort(gfx3d.indexlist.list, gfx3d.indexlist.list + opaqueCount, gfx3d_ysort_compare);
-	
+
 	if (!gfx3d.state.sortmode)
 	{
 		//if we are autosorting translucent polys, we need to do this also
@@ -2257,22 +2257,22 @@ void gfx3d_VBlankEndSignal(bool skipFrame)
 	if (skipFrame) return;
 
 	drawPending = FALSE;
-	
+
 	if (CurrentRenderer->GetRenderNeedsFinish())
 	{
 		bool need3DDisplayFramebuffer;
 		bool need3DCaptureFramebuffer;
 		CurrentRenderer->GetFramebufferFlushStates(need3DDisplayFramebuffer, need3DCaptureFramebuffer);
-		
+
 		CurrentRenderer->SetFramebufferFlushStates(false, false);
 		CurrentRenderer->RenderFinish();
 		CurrentRenderer->SetFramebufferFlushStates(need3DDisplayFramebuffer, need3DCaptureFramebuffer);
 		CurrentRenderer->SetRenderNeedsFinish(false);
 		GPU->GetEventHandler()->DidRender3DEnd();
 	}
-	
+
 	GPU->GetEventHandler()->DidRender3DBegin();
-	
+
 	if (CommonSettings.showGpu.main)
 	{
 		CurrentRenderer->SetRenderNeedsFinish(true);
@@ -2371,9 +2371,9 @@ void gfx3d_glGetMatrix(const MatrixMode m_mode, int index, float *dst)
 	//}
 
 	//MatrixCopy(dest, MatrixStackGetPos(&mtxStack[m_mode], index));
-	
+
 	const s32 *src = (index == -1) ? mtxCurrent[m_mode] : MatrixStackGetPos(&mtxStack[m_mode], index);
-	
+
 	for (size_t i = 0; i < 16; i++)
 		dst[i] = src[i]/4096.0f;
 }
@@ -2488,7 +2488,7 @@ void gfx3d_Update3DFramebuffers(FragmentColor *framebufferRGBA6665, u16 *framebu
 void gfx3d_savestate(EMUFILE* os)
 {
 	CurrentRenderer->RenderFinish();
-	
+
 	//version
 	write32le(4,os);
 
@@ -2532,9 +2532,9 @@ bool gfx3d_loadstate(EMUFILE* is, int size)
 	listTwiddle = 0;
 	polylist = &polylists[listTwiddle];
 	vertlist = &vertlists[listTwiddle];
-	
+
 	gfx3d_parseCurrentDISP3DCNT();
-	
+
 	if (version >= 1)
 	{
 		OSREAD(vertlist->count);
@@ -2577,7 +2577,7 @@ bool gfx3d_loadstate(EMUFILE* is, int size)
 void gfx3d_parseCurrentDISP3DCNT()
 {
 	const IOREG_DISP3DCNT &DISP3DCNT = gfx3d.state.savedDISP3DCNT;
-	
+
 	gfx3d.state.enableTexturing		= (DISP3DCNT.EnableTexMapping != 0);
 	gfx3d.state.shading				=  DISP3DCNT.PolygonShading;
 	gfx3d.state.enableAlphaTest		= (DISP3DCNT.EnableAlphaTest != 0);
@@ -2593,12 +2593,12 @@ void gfx3d_parseCurrentDISP3DCNT()
 void ParseReg_DISP3DCNT()
 {
 	const IOREG_DISP3DCNT &DISP3DCNT = GPU->GetEngineMain()->GetIORegisterMap().DISP3DCNT;
-	
+
 	if (gfx3d.state.savedDISP3DCNT.value == DISP3DCNT.value)
 	{
 		return;
 	}
-	
+
 	gfx3d.state.savedDISP3DCNT.value = DISP3DCNT.value;
 	gfx3d_parseCurrentDISP3DCNT();
 }
@@ -2632,12 +2632,12 @@ static FORCEINLINE VERT clipPoint(bool hirez, const VERT *inside, const VERT *ou
 	const float w_inside = (WHICH == -1) ? -inside->coord[3] : inside->coord[3];
 	const float w_outside = (WHICH == -1) ? -outside->coord[3] : outside->coord[3];
 	const float t = (coord_inside - w_inside) / ((w_outside-w_inside) - (coord_outside-coord_inside));
-	
+
 #define INTERP(X) ret . X = interpolate(t, inside-> X ,outside-> X )
-	
+
 	INTERP(coord[0]); INTERP(coord[1]); INTERP(coord[2]); INTERP(coord[3]);
 	INTERP(texcoord[0]); INTERP(texcoord[1]);
-	
+
 	if (hirez)
 	{
 		INTERP(fcolor[0]); INTERP(fcolor[1]); INTERP(fcolor[2]);
@@ -2695,14 +2695,14 @@ private:
 	VERT* m_prevVert;
 	VERT* m_firstVert;
 	NEXT& m_next;
-	
+
 	FORCEINLINE void clipSegmentVsPlane(bool hirez, const VERT *vert0, const VERT *vert1)
 	{
 		const float *vert0coord = vert0->coord;
 		const float *vert1coord = vert1->coord;
 		const bool out0 = (WHICH == -1) ? (vert0coord[COORD] < -vert0coord[3]) : (vert0coord[COORD] > vert0coord[3]);
 		const bool out1 = (WHICH == -1) ? (vert1coord[COORD] < -vert1coord[3]) : (vert1coord[COORD] > vert1coord[3]);
-		
+
 		//CONSIDER: should we try and clip things behind the eye? does this code even successfully do it? not sure.
 		//if(coord==2 && which==1) {
 		//	out0 = vert0coord[2] < 0;
@@ -2751,19 +2751,19 @@ public:
 		m_nextDestVert = verts;
 		m_numVerts = 0;
 	}
-	
+
 	void clipVert(bool hirez, const VERT *vert)
 	{
 		assert((u32)m_numVerts < MAX_CLIPPED_VERTS);
 		*m_nextDestVert++ = *vert;
 		m_numVerts++;
 	}
-	
+
 	int finish(bool hirez)
 	{
 		return m_numVerts;
 	}
-	
+
 private:
 	VERT* m_nextDestVert;
 	int m_numVerts;
@@ -2790,7 +2790,7 @@ void GFX3D_Clipper::clipPoly(const POLY &poly, const VERT **verts)
 	clipper.init(clippedPolys[clippedPolyCounter].clipVerts);
 	for (size_t i = 0; i < type; i++)
 		clipper.clipVert(USEHIRESINTERPOLATE, verts[i]);
-	
+
 	const PolygonType outType = (PolygonType)clipper.finish(USEHIRESINTERPOLATE);
 
 	assert((u32)outType < MAX_CLIPPED_VERTS);
