@@ -10,6 +10,7 @@
 #include <psp2/ctrl.h>
 #include <psp2/touch.h>
 #include <psp2/display.h>
+#include <psp2/power.h>
 #include <psp2/kernel/processmgr.h>
 
 #include <vita2d.h>
@@ -137,6 +138,10 @@ static void update_input()
 #define FRAMESKIP 0
 #define ROM_PATH "ux0:/data/game.nds"
 
+extern "C" {
+extern int scePowerSetArmClockFrequency(int freq);
+}
+
 int main()
 {
 	int i;
@@ -146,6 +151,7 @@ int main()
 
 	console_init();
 	vita2d_init();
+	vita2d_set_vblank_wait(0);
 	vita2d_set_clear_color(RGBA8(0, 0, 0, 0xFF));
 	sceTouchSetSamplingState(SCE_TOUCH_PORT_FRONT, 1);
 
@@ -157,6 +163,11 @@ int main()
 	NDS_3D_ChangeCore(1);
 	backup_setManualBackupType(0);
 	CommonSettings.ConsoleType = NDS_CONSOLE_TYPE_FAT;
+
+#ifdef HAVE_JIT
+	CommonSettings.use_jit = true;
+	CommonSettings.jit_max_block_size = 32;
+#endif
 
 	DBG("Loading " ROM_PATH "...\n");
 	if (NDS_LoadROM("ux0:/data/game.nds") < 0) {
@@ -170,6 +181,8 @@ int main()
 	data = vita2d_texture_get_datap(fb);
 
 	execute = true;
+
+	scePowerSetArmClockFrequency(444);
 
 	while (run) {
 		update_input();

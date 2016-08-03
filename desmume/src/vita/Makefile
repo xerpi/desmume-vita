@@ -64,6 +64,8 @@ DESMUME_CXX_SOURCES = armcpu.cpp \
 	utils/libfat/lock.cpp \
 	utils/libfat/partition.cpp \
 	metaspu/metaspu.cpp \
+	arm-common/arm_gen.cpp \
+	arm-common/arm_jit.cpp \
 	vita/vita_task.cpp \
 	vita/vita_vfat.cpp
 
@@ -72,16 +74,18 @@ DESMUME_C_SOURCES = utils/ConvertUTF.c
 DESMUME_OBJS = $(foreach source, $(DESMUME_CXX_SOURCES), ../$(source:.cpp=.o)) \
 	$(foreach source, $(DESMUME_C_SOURCES), ../$(source:.c=.o))
 
+DESMUME_FLAGS = -DHAVE_LIBZ -DHAVE_JIT
+
 OBJS     = main.o console.o $(DESMUME_OBJS)
 
 LIBS = -lvita2d -lSceKernel_stub -lSceDisplay_stub -lSceGxm_stub -lSceNet_stub\
 	-lSceSysmodule_stub -lSceCtrl_stub -lSceTouch_stub -lScePgf_stub \
-	-lSceCommonDialog_stub -lfreetype -lpng -ljpeg -lz -lm -lc -lstdc++
+	-lSceCommonDialog_stub -lScePower_stub -lfreetype -lpng -ljpeg -lz -lm -lc -lstdc++
 
 PREFIX    = arm-vita-eabi
 CC        = $(PREFIX)-gcc
 CXX       = $(PREFIX)-g++
-CFLAGS    = -Wl,-q -Wall -O3 -I../ -DHAVE_LIBZ
+CFLAGS    = -Wl,-q -Wall -O3 -I../ $(DESMUME_FLAGS)
 CXXFLAGS  = $(CFLAGS) -fno-rtti -fno-exceptions -fpermissive
 ASFLAGS   = $(CFLAGS)
 
