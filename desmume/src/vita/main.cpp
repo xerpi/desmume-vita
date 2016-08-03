@@ -81,6 +81,7 @@ const int fb_x = SCREEN_W/2 - (256/2) * scale;
 const int fb_y =  SCREEN_H/2 - ((192*2)/2) * scale;
 
 #define EXIT_MASK (SCE_CTRL_START | SCE_CTRL_LTRIGGER)
+#define JOY_THRESHOLD    110
 
 static void update_input()
 {
@@ -92,6 +93,16 @@ static void update_input()
 
 	sceCtrlPeekBufferPositive(0, &pad, 1);
 	sceTouchPeek(0, &touch, 1);
+
+	if (pad.lx < (128 - JOY_THRESHOLD))
+		pad.buttons |= SCE_CTRL_LEFT;
+	else if (pad.lx > (128 + JOY_THRESHOLD))
+		pad.buttons |= SCE_CTRL_RIGHT;
+
+	if (pad.ly < (128 - JOY_THRESHOLD))
+		pad.buttons |= SCE_CTRL_UP;
+	else if (pad.ly > (128 + JOY_THRESHOLD))
+		pad.buttons |= SCE_CTRL_DOWN;
 
 	input.E = pad.buttons & SCE_CTRL_RTRIGGER;
 	input.W = pad.buttons & SCE_CTRL_LTRIGGER;
@@ -135,6 +146,29 @@ static void update_input()
 	NDS_endProcessingInput();
 }
 
+#define FPS_CALC_INTERVAL 1000000
+
+static void calc_fps(char fps_str[32])
+{
+	static SceKernelSysClock old = 0;
+	static unsigned int frames = 0;
+	SceKernelSysClock now;
+	SceKernelSysClock diff;
+	float fps;
+
+	sceKernelGetProcessTime(&now);
+	diff = now - old;
+
+	if (diff >= FPS_CALC_INTERVAL) {
+		fps = frames / ((diff/1000)/1000.0f);
+		sprintf(fps_str, "FPS: %.2f", fps);
+		frames = 0;
+		sceKernelGetProcessTime(&old);
+	}
+
+	frames++;
+}
+
 #define FRAMESKIP 0
 #define ROM_PATH "ux0:/data/game.nds"
 
@@ -148,12 +182,19 @@ int main()
 	vita2d_texture *fb = NULL;
 	void *data;
 	uint16_t *src;
+	char fps_str[32] = {0};
+	vita2d_pgf *pgf;
+
+	scePowerSetArmClockFrequency(444);
 
 	console_init();
 	vita2d_init();
 	vita2d_set_vblank_wait(0);
 	vita2d_set_clear_color(RGBA8(0, 0, 0, 0xFF));
+	sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
 	sceTouchSetSamplingState(SCE_TOUCH_PORT_FRONT, 1);
+
+	pgf = vita2d_load_default_pgf();
 
 	DBG("DeSmuME Vita by xerpi\n");
 
@@ -170,7 +211,7 @@ int main()
 #endif
 
 	DBG("Loading " ROM_PATH "...\n");
-	if (NDS_LoadROM("ux0:/data/game.nds") < 0) {
+	if (NDS_LoadROM(ROM_PATH) < 0) {
 		printf("Error loading game.nds\n");
 		goto exit;
 	}
@@ -181,8 +222,6 @@ int main()
 	data = vita2d_texture_get_datap(fb);
 
 	execute = true;
-
-	scePowerSetArmClockFrequency(444);
 
 	while (run) {
 		update_input();
@@ -204,8 +243,13 @@ int main()
 
 		vita2d_draw_texture_scale(fb, fb_x, fb_y, scale, scale);
 
+		vita2d_pgf_draw_text(pgf, 10, 30, RGBA8(255, 255, 255, 255),
+			1.0f, fps_str);
+
 		vita2d_end_drawing();
 		vita2d_swap_buffers();
+
+		calc_fps(fps_str);
 	}
 
 exit:
@@ -213,6 +257,7 @@ exit:
 	if (fb) {
 		vita2d_free_texture(fb);
 	}
+	vita2d_free_pgf(pgf);
 
 	sceKernelExitProcess(0);
 	return 0;
