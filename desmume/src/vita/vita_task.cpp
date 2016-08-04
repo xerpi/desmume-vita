@@ -23,7 +23,10 @@
 
 int getOnlineCores (void)
 {
-	return 4;
+	/*
+	 * Setting this to 4 makes it unstable (so this Task impl is buguous).
+	 */
+	return 1;
 }
 
 class Task::Impl {
@@ -42,12 +45,14 @@ public:
 
 	//slock_t *mutex;
 	SceUID condWork;
-	SceUID condEndWork;
 	TWork workFunc;
 	void *workFuncParam;
 	void *ret;
 	bool exitThread;
 };
+
+#define EVENT_WORK_START 1
+#define EVENT_WORK_END   2
 
 static int taskProc(SceSize args, void *argp)
 {
@@ -55,11 +60,11 @@ static int taskProc(SceSize args, void *argp)
 	do {
 
 		while (ctx->workFunc == NULL && !ctx->exitThread) {
-			sceKernelWaitEventFlag(ctx->condWork, 1,
+			sceKernelWaitEventFlag(ctx->condWork, EVENT_WORK_START,
 				SCE_EVENT_WAITAND, NULL, NULL);
 		}
 
-		sceKernelClearEventFlag(ctx->condWork, ~1);
+		sceKernelClearEventFlag(ctx->condWork, ~EVENT_WORK_START);
 
 		if (ctx->workFunc != NULL) {
 			ctx->ret = ctx->workFunc(ctx->workFuncParam);
@@ -68,7 +73,7 @@ static int taskProc(SceSize args, void *argp)
 		}
 
 		ctx->workFunc = NULL;
-		sceKernelSetEventFlag(ctx->condEndWork, 1);
+		sceKernelSetEventFlag(ctx->condWork, EVENT_WORK_END);
 	} while(!ctx->exitThread);
 
 	return 0;
@@ -83,14 +88,12 @@ Task::Impl::Impl()
 	exitThread = false;
 
 	condWork = sceKernelCreateEventFlag("desmume_cond_work", 0, 0, NULL);
-	condEndWork = sceKernelCreateEventFlag("desmume_cond_end_work", 0, 0, NULL);
 }
 
 Task::Impl::~Impl()
 {
 	shutdown();
 	sceKernelDeleteEventFlag(condWork);
-	sceKernelDeleteEventFlag(condEndWork);
 }
 
 void Task::Impl::start(bool spinlock)
@@ -104,7 +107,9 @@ void Task::Impl::start(bool spinlock)
 	this->ret = NULL;
 	this->exitThread = false;
 	this->_thread = sceKernelCreateThread("desmume_task", taskProc,
-		0x10000100, 0x10000, 0, 0, NULL);
+		0x10000100, 0x1000, 0, 0, NULL);
+
+	sceKernelClearEventFlag(condWork, ~(EVENT_WORK_START | EVENT_WORK_END));
 
 	Task::Impl *_this = this;
 	sceKernelStartThread(this->_thread, sizeof(_this), &_this);
@@ -121,7 +126,7 @@ void Task::Impl::execute(const TWork &work, void *param)
 	this->workFunc = work;
 	this->workFuncParam = param;
 
-	sceKernelSetEventFlag(condWork, 1);
+	sceKernelSetEventFlag(condWork, EVENT_WORK_START);
 }
 
 void* Task::Impl::finish()
@@ -133,10 +138,11 @@ void* Task::Impl::finish()
 	}
 
 	while (this->workFunc != NULL) {
-		sceKernelWaitEventFlag(condEndWork, 1, SCE_EVENT_WAITAND, NULL, NULL);
+		sceKernelWaitEventFlag(condWork, EVENT_WORK_END,
+			SCE_EVENT_WAITAND, NULL, NULL);
 	}
 
-	sceKernelClearEventFlag(condEndWork, ~1);
+	sceKernelClearEventFlag(condWork, ~EVENT_WORK_END);
 
 	returnValue = this->ret;
 
@@ -145,7 +151,6 @@ void* Task::Impl::finish()
 
 void Task::Impl::shutdown()
 {
-
 	if (!this->_isThreadRunning) {
 		return;
 	}
@@ -153,8 +158,9 @@ void Task::Impl::shutdown()
 	this->workFunc = NULL;
 	this->exitThread = true;
 
-	sceKernelSetEventFlag(condWork, 1);
+	sceKernelSetEventFlag(condWork, EVENT_WORK_START | EVENT_WORK_END);
 	sceKernelWaitThreadEnd(_thread, NULL, NULL);
+	sceKernelDeleteThread(_thread);
 
 	this->_isThreadRunning = false;
 }
